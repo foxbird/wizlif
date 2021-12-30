@@ -44,6 +44,9 @@ namespace Foxpaws.Wizlif.Scanners
             // Create the UdpClient
             UdpClient client = new UdpClient(new IPEndPoint(IPAddress.Any, 0));
 
+            // Allow sending of broadcast datagrabs
+            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Broadcast, true);
+
             // Start the listener
             _listener.DataReceived = ReceivePing;
             _listener.Port = port;
