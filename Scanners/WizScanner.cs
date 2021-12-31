@@ -16,12 +16,15 @@ namespace Foxpaws.Wizlif.Scanners
 {
     public class WizScanner : IScanner
     {
+        private readonly static int PING_DELAY_MS = 1000;
+        private readonly static int PING_COUNT = 10;
+
         private readonly ILogger<WizScanner> _logger;
         protected IWizListener _listener;
 
         protected UdpClient Client { get; set; }
 
-        protected List<WizBulb> Registry = new List<WizBulb>();
+        protected WizBulbRegistry Registry { get; set; } = new WizBulbRegistry();
 
         public WizScanner(ILogger<WizScanner> logger, IWizListener listener)
         {
@@ -54,16 +57,17 @@ namespace Foxpaws.Wizlif.Scanners
             _listener.Start();
 
             // Send the ping
-            SendPing(client, bcast, port);
-
-            // Wait for responses
-            Thread.Sleep(5000);
-
+            for (int i = 0; i < PING_COUNT; i++)
+            {
+                SendPing(client, bcast, port);
+                Thread.Sleep(PING_DELAY_MS);
+            }
+            
             // Stop the listener
             _listener.Stop();
 
             // Print out a status
-            Registry.ForEach(bulb => Console.WriteLine($"IP Address: {bulb.IpAddress}, MAC Address: {bulb.MacAddress}"));
+            Registry.Bulbs.ForEach(bulb => Console.WriteLine($"IP Address: {bulb.IpAddress}, MAC Address: {bulb.MacAddress}"));
 
             await Task.CompletedTask;
         }
@@ -84,7 +88,7 @@ namespace Foxpaws.Wizlif.Scanners
 
             _logger.LogInformation($"Registered bulb {endpoint.Address} / {response.Result.MacAddress}: {response.Result.Success}");
 
-            Registry.Add(new WizBulb() { IpAddress = endpoint.Address, MacAddress = PhysicalAddress.Parse(response.Result.MacAddress) });
+            Registry.Add(endpoint.Address, response.Result.MacAddress);
         }
 
         private IPAddress FindBbroadcastAddress(NetworkInterface netIf)
