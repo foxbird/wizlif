@@ -53,6 +53,7 @@ namespace Foxpaws.Wizlif
             // Command line tools
             services.AddCommandLineParser();
             services.AddTransient<ICommand, Commands.WizScanner>();
+            services.AddTransient<ICommand, Commands.LifxServer>();
             services.AddSingleton<IScanner, Scanners.WizScanner>();
             services.AddSingleton<IWizListener, WizListener>();
 

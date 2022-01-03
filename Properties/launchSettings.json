@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Wizlif": {
+      "commandName": "Project",
+      "commandLineArgs": "serve"
+    }
+  }
+}
